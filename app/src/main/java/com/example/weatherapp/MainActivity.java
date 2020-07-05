@@ -7,8 +7,7 @@ import androidx.core.app.ActivityCompat;
 
 import android.Manifest;
 import android.content.pm.PackageManager;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
+
 import android.location.Location;
 import android.os.Bundle;
 import android.util.Log;
@@ -26,13 +25,21 @@ import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.squareup.picasso.Picasso;
 
+import android.Manifest;
+import android.widget.Toast;
+
 import org.json.JSONObject;
 
 import java.net.URL;
 
+import pub.devrel.easypermissions.AfterPermissionGranted;
+import pub.devrel.easypermissions.EasyPermissions;
+
 public class MainActivity extends AppCompatActivity {
     public String TAG = "MainActivity";
     private FusedLocationProviderClient fusedLocationClient;
+    private final int REQUEST_LOCATION_PERMISSION = 1;
+
 
 
     TextView condition_text_box;
@@ -45,8 +52,6 @@ public class MainActivity extends AppCompatActivity {
     TextView uv_textbox;
     TextView gust_kph;
     TextView last_updated;
-
-
     ImageView imageView;
 
 
@@ -70,9 +75,11 @@ public class MainActivity extends AppCompatActivity {
         last_updated=findViewById(R.id.last_updated_text);
 
 
-        GetLocationfromPlay();
+        requestLocationPermission();
 
-         }
+
+
+    }
 
     public void getCurrentWeather(String location){
 
@@ -100,6 +107,7 @@ public class MainActivity extends AppCompatActivity {
        queue.add(stringRequest);
 
    }
+
     public void ShowData(String data ){
         Log.i(TAG,"Call Show Data Method");
 
@@ -152,6 +160,7 @@ public class MainActivity extends AppCompatActivity {
        }
 
     }
+
     public void ShowImage(String wetherimageurl){
         Log.i(TAG,"Call Show image method");
         Log.i(TAG,wetherimageurl);
@@ -159,7 +168,9 @@ public class MainActivity extends AppCompatActivity {
         Picasso.get().load("https:"+wetherimageurl).into(imageView);
 
     }
+
     public void GetLocationfromPlay(){
+
         Log.i(TAG,"Call Get Location method");
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             Log.i(TAG,"Not location permition");
@@ -182,6 +193,29 @@ public class MainActivity extends AppCompatActivity {
                         }
                     }
                 });
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+        // Forward results to EasyPermissions
+        EasyPermissions.onRequestPermissionsResult(requestCode, permissions, grantResults, this);
+    }
+
+    @AfterPermissionGranted(REQUEST_LOCATION_PERMISSION)
+    public void requestLocationPermission() {
+        String[] perms = {Manifest.permission.ACCESS_FINE_LOCATION};
+        if(EasyPermissions.hasPermissions(this, perms)) {
+            Toast.makeText(this, "Permission already granted", Toast.LENGTH_SHORT).show();
+            GetLocationfromPlay();
+
+        }
+        else {
+            EasyPermissions.requestPermissions(this, "Please grant the location permission", REQUEST_LOCATION_PERMISSION, perms);
+            GetLocationfromPlay();
+
+        }
     }
 
 
