@@ -11,7 +11,9 @@ import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.CursorAdapter;
 import android.widget.ImageView;
+import android.widget.ListView;
 import android.widget.TextView;
 
 import com.android.volley.Request;
@@ -28,6 +30,7 @@ import com.squareup.picasso.Picasso;
 import android.Manifest;
 import android.widget.Toast;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.net.URL;
@@ -53,7 +56,7 @@ public class MainActivity extends AppCompatActivity {
     TextView gust_kph;
     TextView last_updated;
     ImageView imageView;
-
+    ListView weatherforcast;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,6 +64,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+
 
 
         condition_text_box = findViewById(R.id.condition_text);
@@ -73,6 +77,7 @@ public class MainActivity extends AppCompatActivity {
         uv_textbox=findViewById(R.id.uv_textbox);
         gust_kph=findViewById(R.id.gust_kph);
         last_updated=findViewById(R.id.last_updated_text);
+        weatherforcast= (ListView)findViewById(R.id.forcast_list);
 
 
         requestLocationPermission();
@@ -88,7 +93,7 @@ public class MainActivity extends AppCompatActivity {
        Weather weather=new Weather();
 
        RequestQueue queue = Volley.newRequestQueue(this);
-           StringRequest stringRequest=new StringRequest(Request.Method.GET, weather.getBaseURL() + weather.getCurrentWeatherURL()+"?key="+weather.getAPIKEY()+"&q="+location,
+           StringRequest stringRequest=new StringRequest(Request.Method.GET, weather.getBaseURL() + weather.getForcastWeatherURL()+"?key="+weather.getAPIKEY()+"&q="+location+"&days=3",
                    new Response.Listener<String>() {
                        @Override
                        public void onResponse(String response) {
@@ -118,21 +123,37 @@ public class MainActivity extends AppCompatActivity {
            JSONObject current=(JSONObject)dataobject.get("current");
            JSONObject condition=(JSONObject)current.get("condition");
 
+            //Main Data
            String text =(String)condition.getString("text");
            String feelslike_c = (String)current.getString("feelslike_c");
+           String wethericon =(String)condition.getString("icon");
+           String humidity=current.getString("humidity");
+           String cloud=current.getString("cloud");
 
+
+           ShowImage(wethericon); //Main weather icon generate
+
+           //Location Data
            JSONObject location= (JSONObject) dataobject.get("location");
             String location_name= location.getString("name");
             String location_countrydata= location.getString("country");
-
             String location_localtime=location.getString("localtime");
 
-            String humidity=current.getString("humidity");
+            //Atmosphere Data
             String uv=current.getString("uv");
-            String cloud=current.getString("cloud");
             String pressure_mb=current.getString("pressure_mb");
             String gust_kphdata=current.getString("gust_kph");
+
+
+
+            //Update date and time
             String last_updateddata=(String) current.getString("last_updated");
+
+            //Forcast data
+           JSONObject forecast=(JSONObject)dataobject.get("forecast");
+           String forecastday_arry= String.valueOf(forecast.get("forecastday"));
+           weatherForcastdataManipulate(forecastday_arry);
+
 
 
 
@@ -142,15 +163,14 @@ public class MainActivity extends AppCompatActivity {
            humidity_textbox.setText("Humidity "+humidity+"%"+"\uD83D\uDCA7");
            cloud_textbox.setText("Cloud "+cloud+"%"+" ☁");
 
-           passure_textbox.setText("Passure "+pressure_mb+"mb");
-           uv_textbox.setText("UV index "+uv);
-           gust_kph.setText("Wind"+gust_kphdata+"Km");
-
-           String wethericon =(String)condition.getString("icon");
-           ShowImage(wethericon);
+           passure_textbox.setText("Passure: "+pressure_mb+"mb");
+           uv_textbox.setText("UV index:"+uv);
+           gust_kph.setText("Wind :"+gust_kphdata+"Kmph");
 
            location_country.setText(location_name+","+location_countrydata);
            last_updated.setText("Last update :"+last_updateddata);
+
+
 
 
 
@@ -216,6 +236,30 @@ public class MainActivity extends AppCompatActivity {
             GetLocationfromPlay();
 
         }
+    }
+
+    public void weatherForcastdataManipulate(String forcastarry){
+        Log.i(TAG,"weatherForcastdataManipulate call");
+       try {
+
+           JSONArray jsonArray = new JSONArray(forcastarry);
+           String[] strArr = new String[jsonArray.length()];
+
+           for (int i = 0; i < jsonArray.length(); i++) {
+               strArr[i] = jsonArray.getString(i);
+           }
+
+           CustomAdapter customAdapter = new CustomAdapter(getApplicationContext(), strArr);
+           weatherforcast.setAdapter(customAdapter);
+
+
+
+
+
+       }catch (Exception e){
+           Log.i(TAG,"Error in forcast data pharse");
+       }
+
     }
 
 
