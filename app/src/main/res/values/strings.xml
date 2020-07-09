@@ -8,4 +8,14 @@
     <string name="forcast_condition">Condition</string>
     <string name="forcast_temp">forcast_temp</string>
     <string name="rain_probahilty">rain_probahilty</string>
+    <string name="condition_text">Condition Text</string>
+    <string name="feellike_c">Feellike C</string>
+    <string name="contry">contry</string>
+    <string name="humidity">humidity</string>
+    <string name="cloud">cloud</string>
+    <string name="passure">passure</string>
+    <string name="uv_idex">uv idex</string>
+    <string name="gust_speed">gust speed</string>
+    <string name="upate_time">upate time</string>
+    <string name="todo">TODO</string>
 </resources>
