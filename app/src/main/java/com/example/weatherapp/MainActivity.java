@@ -43,6 +43,8 @@ public class MainActivity extends AppCompatActivity {
     private FusedLocationProviderClient fusedLocationClient;
     private final int REQUEST_LOCATION_PERMISSION = 1;
 
+    String locationcodinate;
+
 
 
     TextView condition_text_box;
@@ -191,6 +193,10 @@ public class MainActivity extends AppCompatActivity {
 
     public void GetLocationfromPlay(){
 
+
+
+
+
         Log.i(TAG,"Call Get Location method");
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             Log.i(TAG,"Not location permition");
@@ -206,8 +212,15 @@ public class MainActivity extends AppCompatActivity {
                             Log.i(TAG,String.valueOf(location.getLongitude()));
                             Log.i(TAG,String.valueOf(location.getLatitude()));
 
-                            String locationcodinate=String.valueOf(location.getLatitude())+","+String.valueOf(location.getLongitude());
-                            getCurrentWeather(locationcodinate);
+                            locationcodinate=String.valueOf(location.getLatitude())+","+String.valueOf(location.getLongitude());
+
+                            new Thread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    getCurrentWeather(locationcodinate);
+
+                                }
+                            }).start();
 
 
                         }
@@ -236,6 +249,12 @@ public class MainActivity extends AppCompatActivity {
             GetLocationfromPlay();
 
         }
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        requestLocationPermission();
     }
 
     public void weatherForcastdataManipulate(String forcastarry){
